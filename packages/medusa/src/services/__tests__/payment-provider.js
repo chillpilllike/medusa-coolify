@@ -1,6 +1,7 @@
 import { MockManager, MockRepository } from "medusa-test-utils"
 import PaymentProviderService from "../payment-provider"
-import { testPayServiceMock } from "../__mocks__/test-pay"
+import TestPayLegacyService from "../__mocks__/test-pay-legacy"
+import TestPayService from "../__mocks__/test-pay"
 
 describe("PaymentProviderService", () => {
   describe("retrieveProvider", () => {
@@ -105,7 +106,7 @@ describe("PaymentProviderService", () => {
   })
 })
 
-describe(`PaymentProviderService`, () => {
+describe(`PaymentProviderService (with legacy base payment service)`, () => {
   const container = {
     manager: MockManager,
     paymentSessionRepository: MockRepository({
@@ -140,7 +141,7 @@ describe(`PaymentProviderService`, () => {
         }]),
     }),
     refundRepository: MockRepository(),
-    pp_default_provider: testPayServiceMock,
+    pp_default_provider: new TestPayLegacyService(),
   }
   const providerService = new PaymentProviderService(container)
 
@@ -150,7 +151,7 @@ describe(`PaymentProviderService`, () => {
 
   it("successfully retrieves payment provider", () => {
     const provider = providerService.retrieveProvider("default_provider")
-    expect(provider.identifier).toEqual("test-pay")
+    expect(provider.constructor.identifier).toEqual("test-pay")
   })
 
   it("successfully creates session", async () => {
@@ -158,8 +159,8 @@ describe(`PaymentProviderService`, () => {
       total: 100,
     })
 
-    expect(testPayServiceMock.createPayment).toBeCalledTimes(1)
-    expect(testPayServiceMock.createPayment).toBeCalledWith({
+    expect(TestPayLegacyService.prototype.createPayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.createPayment).toBeCalledWith({
       total: 100,
     })
   })
@@ -178,8 +179,8 @@ describe(`PaymentProviderService`, () => {
       }
     )
 
-    expect(testPayServiceMock.updatePayment).toBeCalledTimes(1)
-    expect(testPayServiceMock.updatePayment).toBeCalledWith(
+    expect(TestPayLegacyService.prototype.updatePayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.updatePayment).toBeCalledWith(
       { id: "1234" },
       {
         total: 100,
@@ -201,8 +202,8 @@ describe(`PaymentProviderService`, () => {
       }
     )
 
-    expect(testPayServiceMock.deletePayment).toBeCalledTimes(1)
-    expect(testPayServiceMock.createPayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.deletePayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.createPayment).toBeCalledTimes(1)
   })
 
   it("successfully delete session", async () => {
@@ -216,7 +217,7 @@ describe(`PaymentProviderService`, () => {
       }
     )
 
-    expect(testPayServiceMock.deletePayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.deletePayment).toBeCalledTimes(1)
   })
 
   it("successfully delete session", async () => {
@@ -230,7 +231,7 @@ describe(`PaymentProviderService`, () => {
       }
     )
 
-    expect(testPayServiceMock.deletePayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.deletePayment).toBeCalledTimes(1)
   })
 
   it("successfully authorize payment", async () => {
@@ -245,7 +246,7 @@ describe(`PaymentProviderService`, () => {
       {}
     )
 
-    expect(testPayServiceMock.authorizePayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.authorizePayment).toBeCalledTimes(1)
   })
 
   it("successfully update session data", async () => {
@@ -260,27 +261,207 @@ describe(`PaymentProviderService`, () => {
       {}
     )
 
-    expect(testPayServiceMock.updatePaymentData).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.updatePaymentData).toBeCalledTimes(1)
   })
 
   it("successfully cancel payment", async () => {
     await providerService.cancelPayment({
       id: "pay_jadazdjk"
     })
-    expect(testPayServiceMock.cancelPayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.cancelPayment).toBeCalledTimes(1)
   })
 
   it("successfully capture payment", async () => {
     await providerService.capturePayment({
       id: "pay_jadazdjk"
     })
-    expect(testPayServiceMock.capturePayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.capturePayment).toBeCalledTimes(1)
   })
 
   it("successfully refund payment", async () => {
     await providerService.refundPayment([{
       id: "pay_jadazdjk"
     }], 50)
-    expect(testPayServiceMock.refundPayment).toBeCalledTimes(1)
+    expect(TestPayLegacyService.prototype.refundPayment).toBeCalledTimes(1)
+  })
+})
+
+describe(`PaymentProviderService (with new base payment service)`, () => {
+  const container = {
+    manager: MockManager,
+    paymentSessionRepository: MockRepository({
+      findOne: () =>
+        Promise.resolve({
+          id: "session",
+          provider_id: "default_provider",
+          data: {
+            id: "1234",
+          },
+        }),
+    }),
+    paymentRepository: MockRepository({
+      findOne: () =>
+        Promise.resolve({
+          id: "pay_jadazdjk",
+          provider_id: "default_provider",
+          data: {
+            id: "1234",
+          },
+        }),
+      find: () =>
+        Promise.resolve([{
+          id: "pay_jadazdjk",
+          provider_id: "default_provider",
+          data: {
+            id: "1234",
+          },
+          captured_at: new Date(),
+          amount: 100,
+          amount_refunded: 0
+        }]),
+    }),
+    refundRepository: MockRepository(),
+    pp_default_provider: new TestPayService(),
+  }
+  const providerService = new PaymentProviderService(container)
+
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it("successfully retrieves payment provider", () => {
+    const provider = providerService.retrieveProvider("default_provider")
+    expect(provider.constructor.identifier).toEqual("test-pay")
+  })
+
+  it("successfully creates session", async () => {
+    await providerService.createSession("default_provider", {
+      total: 100,
+    })
+
+    expect(TestPayService.prototype.createPayment).toBeCalledTimes(1)
+    expect(TestPayService.prototype.createPayment).toBeCalledWith({
+      total: 100,
+    })
+  })
+
+  it("successfully update session", async () => {
+    await providerService.updateSession(
+      {
+        id: "session",
+        provider_id: "default_provider",
+        data: {
+          id: "1234",
+        },
+      },
+      {
+        total: 100,
+      }
+    )
+
+    expect(TestPayService.prototype.updatePayment).toBeCalledTimes(1)
+    expect(TestPayService.prototype.updatePayment).toBeCalledWith(
+      { id: "1234" },
+      {
+        total: 100,
+      }
+    )
+  })
+
+  it("successfully refresh session", async () => {
+    await providerService.refreshSession(
+      {
+        id: "session",
+        provider_id: "default_provider",
+        data: {
+          id: "1234",
+        },
+      },
+      {
+        total: 100,
+      }
+    )
+
+    expect(TestPayService.prototype.deletePayment).toBeCalledTimes(1)
+    expect(TestPayService.prototype.createPayment).toBeCalledTimes(1)
+  })
+
+  it("successfully delete session", async () => {
+    await providerService.deleteSession(
+      {
+        id: "session",
+        provider_id: "default_provider",
+        data: {
+          id: "1234",
+        },
+      }
+    )
+
+    expect(TestPayService.prototype.deletePayment).toBeCalledTimes(1)
+  })
+
+  it("successfully delete session", async () => {
+    await providerService.deleteSession(
+      {
+        id: "session",
+        provider_id: "default_provider",
+        data: {
+          id: "1234",
+        },
+      }
+    )
+
+    expect(TestPayService.prototype.deletePayment).toBeCalledTimes(1)
+  })
+
+  it("successfully authorize payment", async () => {
+    await providerService.authorizePayment(
+      {
+        id: "session",
+        provider_id: "default_provider",
+        data: {
+          id: "1234",
+        },
+      },
+      {}
+    )
+
+    expect(TestPayService.prototype.authorizePayment).toBeCalledTimes(1)
+  })
+
+  it("successfully update session data", async () => {
+    await providerService.updateSessionData(
+      {
+        id: "session",
+        provider_id: "default_provider",
+        data: {
+          id: "1234",
+        },
+      },
+      {}
+    )
+
+    expect(TestPayService.prototype.updatePaymentData).toBeCalledTimes(1)
+  })
+
+  it("successfully cancel payment", async () => {
+    await providerService.cancelPayment({
+      id: "pay_jadazdjk"
+    })
+    expect(TestPayService.prototype.cancelPayment).toBeCalledTimes(1)
+  })
+
+  it("successfully capture payment", async () => {
+    await providerService.capturePayment({
+      id: "pay_jadazdjk"
+    })
+    expect(TestPayService.prototype.capturePayment).toBeCalledTimes(1)
+  })
+
+  it("successfully refund payment", async () => {
+    await providerService.refundPayment([{
+      id: "pay_jadazdjk"
+    }], 50)
+    expect(TestPayService.prototype.refundPayment).toBeCalledTimes(1)
   })
 })
