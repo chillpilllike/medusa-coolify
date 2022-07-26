@@ -90,7 +90,7 @@ class CartService extends TransactionBaseService<CartService> {
   }
 
   protected manager_: EntityManager
-  protected transactionManager_: EntityManager
+  protected transactionManager_: EntityManager | undefined
 
   protected readonly shippingMethodRepository_: typeof ShippingMethodRepository
   protected readonly cartRepository_: typeof CartRepository
