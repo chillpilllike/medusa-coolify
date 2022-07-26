@@ -142,4 +142,3 @@ export class AdminPostRegionsRegionReq {
   @IsOptional()
   metadata?: Record<string, unknown>
 }
-}

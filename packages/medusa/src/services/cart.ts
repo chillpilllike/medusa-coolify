@@ -90,7 +90,7 @@ class CartService extends TransactionBaseService<CartService> {
   }
 
   protected manager_: EntityManager
-  protected transactionManager_: EntityManager | undefined
+  protected transactionManager_: EntityManager
 
   protected readonly shippingMethodRepository_: typeof ShippingMethodRepository
   protected readonly cartRepository_: typeof CartRepository
@@ -392,7 +392,7 @@ class CartService extends TransactionBaseService<CartService> {
           }
         } else {
           if (data.shipping_address) {
-            if (!regCountries.includes(data.shipping_address.country_code)) {
+            if (!regCountries.includes(data.shipping_address.country_code!)) {
               throw new MedusaError(
                 MedusaError.Types.NOT_ALLOWED,
                 "Shipping country not in region"
@@ -402,7 +402,7 @@ class CartService extends TransactionBaseService<CartService> {
           }
           if (data.shipping_address_id) {
             const addr = await addressRepo.findOne(data.shipping_address_id)
-            if (addr && !regCountries.includes(addr.country_code)) {
+            if (addr && !regCountries.includes(addr.country_code!)) {
               throw new MedusaError(
                 MedusaError.Types.NOT_ALLOWED,
                 "Shipping country not in region"
