@@ -18,7 +18,7 @@ import strategiesLoader from "./strategies"
 import subscribersLoader from "./subscribers"
 import { ClassOrFunctionReturning } from "awilix/lib/container"
 import { Connection, getManager } from "typeorm"
-import { Express, NextFunction, Request, Response } from "express"
+import { Express, NextFunction, Request, Response, Router } from "express"
 import {
   asFunction,
   asValue,
