@@ -39,7 +39,7 @@ export default async (req: Request, res: Response) => {
   const {
     validatedQuery: { limit, offset },
     filterableFields,
-    listConfig
+    listConfig,
   } = req
 
   const [collections, count] = await productCollectionService.listAndCount(

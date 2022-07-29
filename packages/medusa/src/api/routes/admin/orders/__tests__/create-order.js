@@ -1,9 +1,6 @@
 import { IdMap } from "medusa-test-utils"
 import { request } from "../../../../../helpers/test-request"
-import {
-  orders,
-  OrderServiceMock,
-} from "../../../../../services/__mocks__/order"
+import { OrderServiceMock } from "../../../../../services/__mocks__/order"
 
 describe("POST /admin/orders", () => {
   describe("successful creation", () => {

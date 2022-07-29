@@ -1,7 +1,6 @@
 import { Request, Response } from "express"
-import { IsNumber, IsOptional, IsString, ValidateNested } from "class-validator"
+import { IsOptional, IsString, ValidateNested } from "class-validator"
 import { Type } from "class-transformer"
-import { removeUndefinedProperties } from "../../../../utils"
 import { SalesChannelService } from "../../../../services"
 import {
   DateComparisonOperator,

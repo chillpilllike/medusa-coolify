@@ -1,7 +1,6 @@
 import { Type } from "class-transformer"
 import {
   IsArray,
-  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -12,11 +11,15 @@ import { MedusaError } from "medusa-core-utils"
 import reqIp from "request-ip"
 import { EntityManager } from "typeorm"
 
-import { defaultStoreCartFields, defaultStoreCartRelations,  } from "."
-import { CartService, LineItemService, RegionService } from "../../../../services"
+import { defaultStoreCartFields, defaultStoreCartRelations } from "."
+import {
+  CartService,
+  LineItemService,
+  RegionService,
+} from "../../../../services"
 import { decorateLineItemsWithTotals } from "./decorate-line-items-with-totals"
-import SalesChannelFeatureFlag from "../../../../loaders/feature-flags/sales-channels";
-import { FeatureFlagDecorators } from "../../../../utils/feature-flag-decorators";
+import SalesChannelFeatureFlag from "../../../../loaders/feature-flags/sales-channels"
+import { FeatureFlagDecorators } from "../../../../utils/feature-flag-decorators"
 import { FlagRouter } from "../../../../utils/flag-router"
 
 /**
@@ -86,9 +89,7 @@ export default async (req, res) => {
     if (typeof validated.region_id !== "undefined") {
       regionId = validated.region_id
     } else {
-      const regions = await regionService
-        .withTransaction(manager)
-        .list({})
+      const regions = await regionService.withTransaction(manager).list({})
 
       if (!regions?.length) {
         throw new MedusaError(

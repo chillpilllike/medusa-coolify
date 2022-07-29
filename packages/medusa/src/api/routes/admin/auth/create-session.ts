@@ -27,7 +27,9 @@ import { MedusaError } from "medusa-core-utils"
  *              $ref: "#/components/schemas/user"
  */
 export default async (req, res) => {
-  const { projectConfig: { jwt_secret } } = req.scope.resolve('configModule')
+  const {
+    projectConfig: { jwt_secret },
+  } = req.scope.resolve("configModule")
   if (!jwt_secret) {
     throw new MedusaError(
       MedusaError.Types.NOT_FOUND,

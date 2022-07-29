@@ -31,7 +31,9 @@ import { Request, Response } from "express"
  */
 export default async (req: Request, res: Response) => {
   const { id } = req.params
-  const { validatedBody } = req as { validatedBody: AdminPostProductsToCollectionReq }
+  const { validatedBody } = req as {
+    validatedBody: AdminPostProductsToCollectionReq
+  }
 
   const productCollectionService: ProductCollectionService = req.scope.resolve(
     "productCollectionService"

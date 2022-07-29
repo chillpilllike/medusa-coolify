@@ -25,7 +25,8 @@ import { AbstractFileService } from "../../../../interfaces"
  *     description: OK
  */
 export default async (req, res) => {
-  const fileService: AbstractFileService<any> = req.scope.resolve("fileService")
+  const fileService: AbstractFileService<never> =
+    req.scope.resolve("fileService")
 
   const url = await fileService.getPresignedDownloadUrl({
     fileKey: (req.validatedBody as AdminPostUploadsDownloadUrlReq).file_key,
