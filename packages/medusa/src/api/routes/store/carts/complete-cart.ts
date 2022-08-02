@@ -1,6 +1,6 @@
-import { ICartCompletionStrategy } from "../../../../interfaces"
+import { AbstractCartCompletionStrategy } from "../../../../interfaces"
 import { IdempotencyKeyService } from "../../../../services"
-import { IdempotencyKey } from "../../../../models/idempotency-key"
+import { IdempotencyKey } from "../../../../models"
 import { EntityManager } from "typeorm";
 
 /**
@@ -43,6 +43,7 @@ import { EntityManager } from "typeorm";
 export default async (req, res) => {
   const { id } = req.params
 
+  const manager: EntityManager = req.scope.resolve("manager")
   const idempotencyKeyService: IdempotencyKeyService = req.scope.resolve(
     "idempotencyKeyService"
   )
@@ -51,7 +52,6 @@ export default async (req, res) => {
 
   let idempotencyKey: IdempotencyKey
   try {
-    const manager: EntityManager = req.scope.resolve("manager")
     idempotencyKey = await manager.transaction(async (transactionManager) => {
       return await idempotencyKeyService.withTransaction(transactionManager).initializeRequest(
         headerKey,
@@ -69,7 +69,7 @@ export default async (req, res) => {
   res.setHeader("Access-Control-Expose-Headers", "Idempotency-Key")
   res.setHeader("Idempotency-Key", idempotencyKey.idempotency_key)
 
-  const completionStrat: ICartCompletionStrategy = req.scope.resolve(
+  const completionStrat: AbstractCartCompletionStrategy = req.scope.resolve(
     "cartCompletionStrategy"
   )
 
