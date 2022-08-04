@@ -287,10 +287,10 @@ class SwapService extends TransactionBaseService<SwapService> {
     const swapRepo = this.manager_.getCustomRepository(this.swapRepository_)
     const query = buildQuery(selector, config)
 
-    const rels = query.relations as (keyof Swap)[]
+    const relations = query.relations as (keyof Swap)[]
     delete query.relations
 
-    return await swapRepo.findWithRelations(rels, query)
+    return await swapRepo.findWithRelations(relations, query)
   }
 
   /**
@@ -571,10 +571,10 @@ class SwapService extends TransactionBaseService<SwapService> {
         swap.no_notification = update.no_notification!
       }
 
+      // TODO: Check this - calling method that doesn't exist
+      // also it seems that update swap isn't call anywhere
       if ("shipping_address" in update) {
-        // TODO: Check this method - why doesn't exist
-        // @ts-ignore
-        await this.updateShippingAddress_(swap, update.shipping_address)
+        // await this.updateShippingAddress_(swap, update.shipping_address)
       }
 
       const swapRepo = manager.getCustomRepository(this.swapRepository_)
@@ -967,7 +967,7 @@ class SwapService extends TransactionBaseService<SwapService> {
       swap.fulfillments = await this.fulfillmentService_
         .withTransaction(manager)
         .createFulfillment(
-          // @ts-ignore
+          // @ts-ignore TODO: check - claim_items,refund_amount,type: these fields are missing
           {
             ...swap,
             payments: swap.payment ? [swap.payment] : order.payments,
@@ -1176,7 +1176,7 @@ class SwapService extends TransactionBaseService<SwapService> {
 
         const updatedSwap = await swapRepo.save(swap)
 
-        this.eventBus_
+        await this.eventBus_
           .withTransaction(transactionManager)
           .emit(CartService.Events.UPDATED, updatedSwap)
 
