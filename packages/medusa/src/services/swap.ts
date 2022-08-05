@@ -29,7 +29,6 @@ import {
   Order,
   ReturnItem,
   ReturnStatus,
-  ShippingMethod,
   Swap,
   SwapFulfillmentStatus,
   SwapPaymentStatus,
@@ -40,7 +39,6 @@ type InjectedProps = {
   manager: EntityManager
 
   swapRepository: typeof SwapRepository
-  shippingTaxLineRepo: typeof ShippingMethodTaxLineRepository
   shippingMethodTaxLineRepository: typeof ShippingMethodTaxLineRepository
 
   cartService: CartService
