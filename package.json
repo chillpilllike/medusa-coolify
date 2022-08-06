@@ -55,6 +55,7 @@
     "*.{md,yaml,yml}": "prettier --write"
   },
   "scripts": {
+    "start": "medusa migrations run && medusa develop -p=8080",
     "hooks:install": "husky install",
     "hooks:uninstall": "husky uninstall",
     "publish:next": "lerna publish --canary --preid next --dist-tag next",
